@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Demand, Item, User
-from .serializers import DemandSerializer, ItemSerializer, RegisterSerializer, LoginSerializer
+from .serializers import DemandSerializer, ItemSerializer, RegisterSerializer, LoginSerializer, DemandListSerializer
 
 
 class RegisterView(generics.GenericAPIView):
@@ -35,7 +35,7 @@ class Login(generics.GenericAPIView):
 
 class DemandListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = DemandSerializer
+    serializer_class = DemandListSerializer
 
     queryset = Demand.objects.all()
 

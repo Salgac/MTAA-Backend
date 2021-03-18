@@ -67,6 +67,16 @@ class DemandSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['volunteer', 'client', 'state']
 
+
+class DemandListSerializer(serializers.ModelSerializer):
+    client = UserSerializer(read_only=True)
+    volunteer = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Demand
+        fields = '__all__'
+        read_only_fields = ['volunteer', 'client', 'state']
+
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         demand = Demand.objects.create(**validated_data)

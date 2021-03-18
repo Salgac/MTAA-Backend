@@ -1,6 +1,8 @@
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager)
 from django.db import models
 
+ADDRESS_LENGTH = 80
+
 
 class UserManager(BaseUserManager):
     def create_user(self, username, address, password=None):
@@ -18,7 +20,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     username = models.CharField(max_length=20, unique=True, db_index=True)
-    address = models.CharField(max_length=40)
+    address = models.CharField(max_length=ADDRESS_LENGTH)
     avatar = models.BinaryField()
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -42,7 +44,7 @@ class Demand(models.Model):
         EXPIRED = 'expired'
 
     title = models.CharField(max_length=20)
-    address = models.CharField(max_length=40)
+    address = models.CharField(max_length=ADDRESS_LENGTH)
     created_at = models.DateTimeField(auto_now_add=True)
     expired_at = models.DateTimeField()
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='client')
