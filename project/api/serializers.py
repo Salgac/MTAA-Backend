@@ -39,7 +39,7 @@ class LoginSerializer(serializers.ModelSerializer):
         password = attrs.get('password', '')
         user = authenticate(username=username, password=password)
         if not user:
-            raise AuthenticationFailed('Invalid credentials')
+            raise AuthenticationFailed()
         return user
 
 
@@ -67,6 +67,13 @@ class DemandSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['volunteer', 'client', 'state']
 
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        demand = Demand.objects.create(**validated_data)
+        for item_data in items_data:
+            Item.objects.create(demand=demand, **item_data)
+        return demand
+
 
 class DemandListSerializer(serializers.ModelSerializer):
     client = UserSerializer(read_only=True)
@@ -76,10 +83,3 @@ class DemandListSerializer(serializers.ModelSerializer):
         model = Demand
         fields = '__all__'
         read_only_fields = ['volunteer', 'client', 'state']
-
-    def create(self, validated_data):
-        items_data = validated_data.pop('items')
-        demand = Demand.objects.create(**validated_data)
-        for item_data in items_data:
-            Item.objects.create(demand=demand, **item_data)
-        return demand
