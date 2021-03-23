@@ -61,7 +61,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class DemandSerializer(serializers.ModelSerializer):
-    items = ItemSerializer(many=True)
+    items = ItemSerializer(many=True, read_only=True)
     client = UserSerializer(read_only=True)
     volunteer = UserSerializer(read_only=True)
     address = serializers.CharField(required=False)
@@ -71,23 +71,22 @@ class DemandSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['volunteer', 'client', 'state']
 
-    def validate(self, attrs):
-        expired_at = attrs.get('expired_at')
-        if expired_at < timezone.now() + datetime.timedelta(days=1):
-            raise serializers.ValidationError('Expiration time must be in more than 24 hours from now')
 
-        title = attrs.get('title')
-        user = self.context['request'].user
-        client_demands = Demand.objects.all().filter(client=user)
-        if client_demands.filter(title=title):
-            raise serializers.ValidationError('Demand with given title already exists')
-
-        return attrs
+class DemandListSerializer(DemandSerializer):
+    items = ItemSerializer(many=True, write_only=True)
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         if not items_data:
             raise serializers.ValidationError('There must be at least one item')
+
+        non_duplicates = list()
+        for item_data in items_data:
+            name = item_data['name']
+            if name not in non_duplicates:
+                non_duplicates.append(name)
+            else:
+                raise serializers.ValidationError('Name of each item must be unique for specific demand')
 
         demand = Demand.objects.create(**validated_data)
         for item_data in items_data:
@@ -97,13 +96,3 @@ class DemandSerializer(serializers.ModelSerializer):
         if not demand.address:
             demand.address = user.address
         return demand
-
-
-class DemandListSerializer(serializers.ModelSerializer):
-    client = UserSerializer(read_only=True)
-    volunteer = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Demand
-        fields = '__all__'
-        read_only_fields = ['volunteer', 'client', 'state']

@@ -1,5 +1,9 @@
+import datetime
+
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager)
 from django.db import models
+from django.utils import timezone
+from rest_framework import serializers
 
 ADDRESS_LENGTH = 80
 
@@ -54,6 +58,18 @@ class Demand(models.Model):
     def __str__(self):
         str(self.title)
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.expired_at < timezone.now() + datetime.timedelta(days=1):
+            raise serializers.ValidationError('Expiration time must be in more than 24 hours from now')
+
+        # the demand is being created
+        if self.created_at is None:
+            client_demands = Demand.objects.all().filter(client=self.client)
+            if client_demands.filter(title=self.title):
+                raise serializers.ValidationError('Demand with given title already exists')
+
+        super().save(force_insert, force_update, using, update_fields)
+
 
 class Item(models.Model):
     class Unit(models.TextChoices):
@@ -65,6 +81,9 @@ class Item(models.Model):
     unit = models.CharField(choices=Unit.choices, max_length=5)
     price = models.DecimalField(decimal_places=2, max_digits=5)
     demand = models.ForeignKey(Demand, on_delete=models.CASCADE, related_name='items')
+
+    class Meta:
+        unique_together = ('demand', 'name',)
 
     def __str__(self):
         str(self.name)

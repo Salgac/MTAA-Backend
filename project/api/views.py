@@ -53,7 +53,7 @@ class Login(generics.GenericAPIView):
 
 class DemandListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = DemandSerializer
+    serializer_class = DemandListSerializer
 
     queryset = Demand.objects.all()
 
@@ -65,7 +65,6 @@ class DemandListAPIView(generics.ListCreateAPIView):
                            Parameter(name='address', in_=openapi.IN_QUERY, type=openapi.TYPE_STRING)]
     )
     def get(self, request):
-        self.serializer_class = DemandListSerializer
         demands = Demand.objects.all()
         user_query = request.query_params.get('user')
         user = self.request.user
