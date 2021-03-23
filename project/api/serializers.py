@@ -1,4 +1,7 @@
+import datetime
+
 from django.contrib.auth import authenticate
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -67,11 +70,31 @@ class DemandSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['volunteer', 'client', 'state']
 
+    def validate(self, attrs):
+        expired_at = attrs.get('expired_at')
+        if expired_at < timezone.now() + datetime.timedelta(days=1):
+            raise serializers.ValidationError('Expiration time must be in more than 24 hours from now')
+
+        title = attrs.get('title')
+        user = self.context['request'].user
+        client_demands = Demand.objects.all().filter(client=user)
+        if client_demands.filter(title=title):
+            raise serializers.ValidationError('Demand with given title already exists')
+
+        return attrs
+
     def create(self, validated_data):
         items_data = validated_data.pop('items')
+        if not items_data:
+            raise serializers.ValidationError('There must be at least one item')
+
         demand = Demand.objects.create(**validated_data)
         for item_data in items_data:
             Item.objects.create(demand=demand, **item_data)
+
+        user = self.context['request'].user
+        if not demand.address:
+            demand.address = user.address
         return demand
 
 
