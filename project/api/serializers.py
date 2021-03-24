@@ -1,4 +1,7 @@
+import datetime
+
 from django.contrib.auth import authenticate
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -58,28 +61,38 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class DemandSerializer(serializers.ModelSerializer):
-    items = ItemSerializer(many=True)
+    items = ItemSerializer(many=True, read_only=True)
     client = UserSerializer(read_only=True)
     volunteer = UserSerializer(read_only=True)
+    address = serializers.CharField(required=False)
 
     class Meta:
         model = Demand
         fields = '__all__'
         read_only_fields = ['volunteer', 'client', 'state']
+
+
+class DemandListSerializer(DemandSerializer):
+    items = ItemSerializer(many=True, write_only=True)
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
+        if not items_data:
+            raise serializers.ValidationError('There must be at least one item')
+
+        non_duplicates = list()
+        for item_data in items_data:
+            name = item_data['name']
+            if name not in non_duplicates:
+                non_duplicates.append(name)
+            else:
+                raise serializers.ValidationError('Name of each item must be unique for specific demand')
+
         demand = Demand.objects.create(**validated_data)
         for item_data in items_data:
             Item.objects.create(demand=demand, **item_data)
+
+        user = self.context['request'].user
+        if not demand.address:
+            demand.address = user.address
         return demand
-
-
-class DemandListSerializer(serializers.ModelSerializer):
-    client = UserSerializer(read_only=True)
-    volunteer = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Demand
-        fields = '__all__'
-        read_only_fields = ['volunteer', 'client', 'state']
