@@ -15,15 +15,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'address', 'password']
 
-    def validate(self, attrs):
-        username = attrs.get('username', '')
-        address = attrs.get('address', '')
-        if not username.isalnum():
-            raise serializers.ValidationError('The username should only contain alphanumeric characters')
-        if address is None:
-            raise serializers.ValidationError('Address is required')
-        return attrs
-
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
 
