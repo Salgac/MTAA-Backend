@@ -1,13 +1,14 @@
-from PIL import Image
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, Schema
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import ParseError
-from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.parsers import FileUploadParser
+from rest_framework.exceptions import ParseError
+from PIL import Image
+import os
 
 from .models import Demand, User
 from .serializers import (
@@ -76,26 +77,30 @@ class Login(generics.GenericAPIView):
 
 
 class ImageView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
     parser_classes = [FileUploadParser]
 
-    def put(self, request, name, filename):
+    def put(self, request, filename):
         # validate request data in serializer
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        path = "avatars/" + name + ".jpg"
 
         # test for file in data
         if "file" not in request.data:
             raise ParseError("Empty content.")
 
+        # get file extension from url
+        filename, extension = os.path.splitext(filename)
+
+        # get user
+        user = self.request.user
+        path = "avatars/" + user.username + extension
+
         # open and save image
         img = Image.open(request.data["file"])
         img.save(path)
 
-        # get user and save the image
-        user = User.objects.get(username=name)
         user.avatar = path
         user.save()
 
