@@ -1,20 +1,18 @@
+from PIL import Image
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, Schema
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import ParseError
+from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.parsers import FileUploadParser
-from rest_framework.exceptions import ParseError
-from PIL import Image
-from django.core.files import File
 
-from .models import Demand, Item, User
+from .models import Demand, User
 from .serializers import (
     DemandSerializer,
     UserSerializer,
-    ItemSerializer,
     RegisterSerializer,
     LoginSerializer,
     DemandListSerializer,
@@ -149,11 +147,4 @@ class DemandDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DemandSerializer
     queryset = Demand.objects.all()
-    lookup_field = "id"
-
-
-class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = ItemSerializer
-    queryset = Item.objects.all()
     lookup_field = "id"
