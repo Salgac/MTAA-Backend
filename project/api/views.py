@@ -103,7 +103,7 @@ class ImageView(generics.GenericAPIView):
 
         # render response
         return Response(
-            {"user": name, "file_path": path},
+            {"user": user.username, "file_path": user.avatar.url},
             status=status.HTTP_200_OK,
         )
 
