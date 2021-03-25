@@ -1,7 +1,7 @@
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, Schema
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, generics
+from rest_framework import status, generics, serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -72,6 +72,8 @@ class DemandListAPIView(generics.ListCreateAPIView):
             demands = demands.filter(client=user)
         elif user_query == 'volunteer':
             demands = demands.filter(volunteer=user)
+        else:
+            demands = demands.exclude(state=Demand.State.EXPIRED)
 
         address_query = request.query_params.get('address')
         if address_query is not None:
@@ -86,6 +88,23 @@ class DemandDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = DemandSerializer
     queryset = Demand.objects.all()
     lookup_field = 'id'
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        state = request.data['state']
+        if state == Demand.State.ACCEPTED:
+            serializer.save(volunteer=request.user)
+        serializer.save(state=state)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        if not user == instance.client:
+            raise serializers.ValidationError("Demand can be deleted only by client")
+        super().perform_destroy(instance)
 
 
 class ItemDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
