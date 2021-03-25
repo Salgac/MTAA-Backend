@@ -39,7 +39,16 @@ class User(AbstractBaseUser):
         return self.username
 
 
+class DemandManager(models.Manager):
+    def get_queryset(self):
+        queryset = super(DemandManager, self).get_queryset()
+        queryset.filter(expired_at__lt=timezone.now()).update(state=Demand.State.EXPIRED)
+        return queryset
+
+
 class Demand(models.Model):
+    objects = DemandManager()
+
     class State(models.TextChoices):
         CREATED = 'created'
         ACCEPTED = 'accepted'

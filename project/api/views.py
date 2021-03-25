@@ -72,6 +72,8 @@ class DemandListAPIView(generics.ListCreateAPIView):
             demands = demands.filter(client=user)
         elif user_query == 'volunteer':
             demands = demands.filter(volunteer=user)
+        else:
+            demands = demands.exclude(state=Demand.State.EXPIRED)
 
         address_query = request.query_params.get('address')
         if address_query is not None:
