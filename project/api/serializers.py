@@ -10,7 +10,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'address', 'password']
+        fields = ["username", "address", "password"]
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -22,12 +22,12 @@ class LoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'address', 'avatar', 'password']
-        read_only_fields = ['address', 'avatar']
+        fields = ["username", "address", "avatar", "password"]
+        read_only_fields = ["address", "avatar"]
 
     def validate(self, attrs):
-        username = attrs.get('username', '')
-        password = attrs.get('password', '')
+        username = attrs.get("username", "")
+        password = attrs.get("password", "")
         user = authenticate(username=username, password=password)
         if not user:
             raise AuthenticationFailed()
@@ -37,28 +37,30 @@ class LoginSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'address', 'avatar']
-        read_only_fields = ['username', 'address', 'avatar']
+        fields = ["username", "address", "avatar"]
+        read_only_fields = ["username", "address", "avatar"]
 
 
 class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = '__all__'
-        read_only_fields = ['demand']
+        fields = "__all__"
+        read_only_fields = ["demand"]
 
 
 def check_demand_duplicates(validated_data):
-    items_data = validated_data.pop('items')
+    items_data = validated_data.pop("items")
     if not items_data:
-        raise serializers.ValidationError('There must be at least one item')
+        raise serializers.ValidationError("There must be at least one item")
     non_duplicates = list()
     for item_data in items_data:
-        name = item_data['name']
+        name = item_data["name"]
         if name not in non_duplicates:
             non_duplicates.append(name)
         else:
-            raise serializers.ValidationError('Name of each item must be unique for specific demand')
+            raise serializers.ValidationError(
+                "Name of each item must be unique for specific demand"
+            )
     return items_data
 
 
@@ -75,40 +77,69 @@ class DemandSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Demand
-        fields = '__all__'
-        read_only_fields = ['volunteer', 'client', 'state']
+        fields = "__all__"
+        read_only_fields = ["volunteer", "client", "state"]
 
     def update(self, instance, validated_data):
         """
         Validation of state flow and user permission for demand update.
         """
-        request = self.context['request']
+        request = self.context["request"]
         user = request.user
         # PATCH request for state update
         if self.partial:
-            state = request.data['state']
+            state = request.data["state"]
             if instance.state == Demand.State.EXPIRED:
                 serializers.ValidationError("Demand has already expired")
-            if ((instance.state == Demand.State.CREATED and not state == Demand.State.ACCEPTED) or
-                    (instance.state == Demand.State.ACCEPTED and not state == Demand.State.COMPLETED) or
-                    (instance.state == Demand.State.COMPLETED and not state == Demand.State.APPROVED)):
+            if (
+                (
+                    instance.state == Demand.State.CREATED
+                    and not state == Demand.State.ACCEPTED
+                )
+                or (
+                    instance.state == Demand.State.ACCEPTED
+                    and not state == Demand.State.COMPLETED
+                )
+                or (
+                    instance.state == Demand.State.COMPLETED
+                    and not state == Demand.State.APPROVED
+                )
+            ):
                 raise serializers.ValidationError(
-                    "Demand state cannot be changed from " + str(instance.state) + " to " + str(state))
+                    "Demand state cannot be changed from "
+                    + str(instance.state)
+                    + " to "
+                    + str(state)
+                )
 
-            if (state == Demand.State.ACCEPTED or state == Demand.State.COMPLETED) and user == instance.client:
-                raise serializers.ValidationError("Demand state cannot be changed to " + str(state) + " by client")
+            if (
+                state == Demand.State.ACCEPTED or state == Demand.State.COMPLETED
+            ) and user == instance.client:
+                raise serializers.ValidationError(
+                    "Demand state cannot be changed to " + str(state) + " by client"
+                )
             if state == Demand.State.COMPLETED and not user == instance.volunteer:
                 raise serializers.ValidationError(
-                    "Demand state can be changed to " + str(Demand.State.COMPLETED) + " only by volunteer")
+                    "Demand state can be changed to "
+                    + str(Demand.State.COMPLETED)
+                    + " only by volunteer"
+                )
             if state == Demand.State.APPROVED and not user == instance.client:
                 raise serializers.ValidationError(
-                    "Demand state can be changed to " + str(Demand.State.APPROVED) + " only by client")
+                    "Demand state can be changed to "
+                    + str(Demand.State.APPROVED)
+                    + " only by client"
+                )
         # POST request for demand details update
         else:
             if not user == instance.client:
-                raise serializers.ValidationError("Demand can be changed only by client")
+                raise serializers.ValidationError(
+                    "Demand can be changed only by client"
+                )
             if not instance.state == Demand.State.CREATED:
-                raise serializers.ValidationError("Demand can be changed only in state " + str(Demand.State.CREATED))
+                raise serializers.ValidationError(
+                    "Demand can be changed only in state " + str(Demand.State.CREATED)
+                )
             # delete old items and create new ones
             Item.objects.filter(demand=instance.id).delete()
             items_data = check_demand_duplicates(validated_data)
@@ -123,7 +154,7 @@ class DemandListSerializer(DemandSerializer):
         items_data = check_demand_duplicates(validated_data)
         demand = Demand.objects.create(**validated_data)
         create_items_for_demand(items_data, demand)
-        user = self.context['request'].user
+        user = self.context["request"].user
         if not demand.address:
             demand.address = user.address
         return demand
