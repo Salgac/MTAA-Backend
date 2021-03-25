@@ -5,10 +5,15 @@ from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.parsers import FileUploadParser
+from rest_framework.exceptions import ParseError
+from PIL import Image
+from django.core.files import File
 
 from .models import Demand, Item, User
 from .serializers import (
     DemandSerializer,
+    UserSerializer,
     ItemSerializer,
     RegisterSerializer,
     LoginSerializer,
@@ -69,6 +74,37 @@ class Login(generics.GenericAPIView):
         token = Token.objects.get(user=user).key
         return Response(
             {"token": token, "user": serializer.data}, status=status.HTTP_200_OK
+        )
+
+
+class ImageView(generics.GenericAPIView):
+    serializer_class = UserSerializer
+    parser_classes = [FileUploadParser]
+
+    def put(self, request, name, filename):
+        # validate request data in serializer
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        path = "avatars/" + name + ".jpg"
+
+        # test for file in data
+        if "file" not in request.data:
+            raise ParseError("Empty content.")
+
+        # open and save image
+        img = Image.open(request.data["file"])
+        img.save(path)
+
+        # get user and save the image
+        user = User.objects.get(username=name)
+        user.avatar = path
+        user.save()
+
+        # render response
+        return Response(
+            {"user": name, "file_path": path},
+            status=status.HTTP_200_OK,
         )
 
 

@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     username = models.CharField(max_length=20, unique=True, db_index=True)
     address = models.CharField(max_length=ADDRESS_LENGTH)
-    avatar = models.BinaryField()
+    avatar = models.ImageField(upload_to="avatars/")
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
