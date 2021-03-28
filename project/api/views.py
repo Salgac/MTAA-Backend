@@ -10,6 +10,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.http import FileResponse
 
 from .models import Demand, User
 from .serializers import (
@@ -111,6 +112,17 @@ class ImageView(generics.GenericAPIView):
             status=status.HTTP_200_OK,
         )
 
+    def get(self, request, filename):
+        # validate name
+        try:
+            img = open("avatars/" + filename, "rb")
+        except FileNotFoundError:
+            img = open("avatars/default.png", "rb")
+
+        # return
+        response = FileResponse(img)
+        return response
+
 
 class DemandListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -160,7 +172,7 @@ class DemandDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        state = request.data['state']
+        state = request.data["state"]
         if state == Demand.State.ACCEPTED:
             serializer.save(volunteer=request.user)
         serializer.save(state=state)
