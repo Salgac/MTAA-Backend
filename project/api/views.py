@@ -99,8 +99,9 @@ class ImageView(generics.GenericAPIView):
         user = self.request.user
         path = "avatars/" + user.username + extension
 
-        # open and save image
+        # open, resize and save image
         img = Image.open(request.data["file"])
+        img = img.resize((100, 100), Image.ANTIALIAS)
         img.save(path)
 
         user.avatar = path
