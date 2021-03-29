@@ -112,6 +112,10 @@ class ImageView(generics.GenericAPIView):
             status=status.HTTP_200_OK,
         )
 
+
+class AvatarView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, filename):
         # validate name
         try:
