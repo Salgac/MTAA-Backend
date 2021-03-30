@@ -1,0 +1,98 @@
+{
+	"info": {
+		"_postman_id": "8d58d730-7626-454a-8155-b1f95f325ca0",
+		"name": "User",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Update avatar",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Disposition",
+						"value": "attachment; filename=avatar",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/C:/Users/MDudak/Desktop/Foto.jpg"
+					}
+				},
+				"url": {
+					"raw": "{{base_address}}/user/",
+					"host": [
+						"{{base_address}}"
+					],
+					"path": [
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET avatar",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_address}}/avatar/client.png",
+					"host": [
+						"{{base_address}}"
+					],
+					"path": [
+						"avatar",
+						"client.png"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "Token {{token}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "2b38b3ad800f7c03ca9fdfdcdd34e116f1f182b7"
+		}
+	]
+}

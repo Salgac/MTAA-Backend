@@ -1,0 +1,1546 @@
+{
+	"info": {
+		"_postman_id": "cb6fad00-0fc2-4794-b8c9-4773b7a7b1f3",
+		"name": "Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "New user",
+			"item": [
+				{
+					"name": "Register new user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"New user created successfully\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('username', jsonData.user.username);\r",
+									"    console.log('Username \\'' + pm.collectionVariables.get('username') + '\\' added to collectionVariables');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"{{$randomUserName}}\",\r\n  \"address\": \"{{$randomStreetAddress}}\",\r\n  \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_address}}/register/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register user with existing name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"New user created successfully\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"\r",
+									"    requestJson = pm.request.body.toJSON();\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"{{username}}\",\r\n  \"address\": \"{{$randomStreetAddress}}\",\r\n  \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_address}}/register/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login user",
+			"item": [
+				{
+					"name": "Precondition - register user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"New user created successfully\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"\r",
+									"    var requestBody = JSON.parse(pm.request.body.raw);\r",
+									"    pm.collectionVariables.set('username', requestBody.username);\r",
+									"    pm.collectionVariables.set('password', requestBody.password);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('token', jsonData.token);\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"{{$randomUserName}}\",\r\n  \"address\": \"{{$randomStreetAddress}}\",\r\n  \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_address}}/register/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login registered user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Login successful\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.token).to.eq(pm.collectionVariables.get('token'))\r",
+									"    pm.expect(jsonData.user.username).to.eq(pm.collectionVariables.get(\"username\"));\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_address}}/login/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"login",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Demand detail",
+			"item": [
+				{
+					"name": "Precondition - register user 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"New user created successfully\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('token_1', jsonData.token);\r",
+									"    pm.collectionVariables.set('token', jsonData.token);\r",
+									"    pm.collectionVariables.set('user_address', jsonData.user.address);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"{{$randomUserName}}\",\r\n  \"address\": \"{{$randomStreetAddress}}\",\r\n  \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_address}}/register/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Precondition - register user 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"New user created successfully\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('token_2', jsonData.token);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"{{$randomUserName}}\",\r\n  \"address\": \"{{$randomStreetAddress}}\",\r\n  \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_address}}/register/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create demand without address",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var date = new Date();\r",
+									"date.setHours(date.getHours()+40)\r",
+									"pm.collectionVariables.set('expired_at', date.toISOString());\r",
+									"\r",
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_1'))"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand created successfully\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('demand_id', jsonData.id)\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('demand_title', jsonData.title); \r",
+									"});\r",
+									"\r",
+									"pm.test(\"Demand has address from user\", function(){\r",
+									"    var user_address = pm.collectionVariables.get('user_address');\r",
+									"    var res_address = pm.response.json().address;\r",
+									"    pm.expect(res_address).to.eq(user_address);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"{{$randomNoun}}\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"{{$randomNoun}}\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        }\r\n    ],\r\n    \"title\": \"{{$randomFullName}}\",\r\n    \"expired_at\": \"{{expired_at}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create demand with existing title",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Create demand with title that already exists\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"{{$randomNoun}}\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"{{$randomNoun}}\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        }\r\n    ],\r\n    \"title\": \"{{demand_title}}\",\r\n    \"address\": \"{{$randomStreetAddress}}\",\r\n    \"expired_at\": \"{{expired_at}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create demand with existing title with another user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_2'))"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Create demand with title that already exists with another user\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"{{$randomNoun}}\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"{{$randomNoun}}\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        }\r\n    ],\r\n    \"title\": \"{{demand_title}}\",\r\n    \"address\": \"{{$randomStreetAddress}}\",\r\n    \"expired_at\": \"{{expired_at}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create demand with two items with same name",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Create demand with two itmes with same name\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"name\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"name\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        }\r\n    ],\r\n    \"title\": \"{{demand_title}}\",\r\n    \"address\": \"{{$randomStreetAddress}}\",\r\n    \"expired_at\": \"{{expired_at}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change demand data with different user",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('demand_title', 'Nový názov');\r",
+									"pm.collectionVariables.set('demand_address', 'Nová adresa');\r",
+									"\r",
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_2'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand can be updated only by client\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 69ac4b34fbe733bc62f88b1077eeae016dee1291"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"Banan\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"Mlieko\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"Novy item\",\r\n            \"quantity\": 25,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 14.2\r\n        }\r\n    ],\r\n    \"title\": \"Zmenený názov\",\r\n    \"address\": \"Zmenená adresa\",\r\n    \"expired_at\": \"{{expired_at}}\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/demand/{{demand_id}}/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change demand data",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var date = new Date();\r",
+									"date.setHours(date.getHours()+100)\r",
+									"pm.collectionVariables.set('expired_at', date.toISOString());\r",
+									"\r",
+									"pm.collectionVariables.set('demand_title', 'Nový názov');\r",
+									"pm.collectionVariables.set('demand_address', 'Nová adresa');\r",
+									"\r",
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_1'));\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand successfully updated\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Demand has updated data\", function(){\r",
+									"    var res_address = pm.response.json().address;\r",
+									"    var res_title = pm.response.json().title;\r",
+									"    var res_expired_at = new Date(pm.response.json().expired_at).toISOString();\r",
+									"    var res_item_count = pm.response.json().items.count();\r",
+									"    pm.expect(res_address).to.eq(\"Zmenená adresa\");\r",
+									"    pm.expect(res_title).to.eq(\"Zmenený názov\");\r",
+									"    pm.expect(res_expired_at).to.eq(pm.collectionVariables.get('expired_at'));\r",
+									"    pm.expect(res_item_count).to.eq(3);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Token 69ac4b34fbe733bc62f88b1077eeae016dee1291"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"Banan\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"Mlieko\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"Novy item\",\r\n            \"quantity\": 25,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 14.2\r\n        }\r\n    ],\r\n    \"title\": \"Zmenený názov\",\r\n    \"address\": \"Zmenená adresa\",\r\n    \"expired_at\": \"{{expired_at}}\"\r\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/demand/{{demand_id}}/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify demand detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand is successfully returned with updated data\", function(){\r",
+									"    var res_address = pm.response.json().address;\r",
+									"    var res_title = pm.response.json().title;\r",
+									"    var res_expired_at = new Date(pm.response.json().expired_at).toISOString();\r",
+									"    var res_item_count = pm.response.json().items.count();\r",
+									"    pm.expect(res_address).to.eq(\"Zmenená adresa\");\r",
+									"    pm.expect(res_title).to.eq(\"Zmenený názov\");\r",
+									"    pm.expect(res_expired_at).to.eq(pm.collectionVariables.get('expired_at'));\r",
+									"    pm.expect(res_item_count).to.eq(3);\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Demand with different user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Delete can be deleted only by client\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_2'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Demand",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Delete demand successfully\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_1'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "apikey",
+				"apikey": [
+					{
+						"key": "key",
+						"value": "Authorization",
+						"type": "string"
+					},
+					{
+						"key": "value",
+						"value": "Token {{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Demand state flow",
+			"item": [
+				{
+					"name": "Precondition - register user 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"New user created successfully\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('token_1', jsonData.token);\r",
+									"    pm.collectionVariables.set('token', jsonData.token);\r",
+									"    pm.collectionVariables.set('user_address', jsonData.user.address);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"{{$randomUserName}}\",\r\n  \"address\": \"{{$randomStreetAddress}}\",\r\n  \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_address}}/register/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Precondition - register user 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"New user created successfully\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('token_2', jsonData.token);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"{{$randomUserName}}\",\r\n  \"address\": \"{{$randomStreetAddress}}\",\r\n  \"password\": \"{{$randomPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_address}}/register/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Precondition - Create demand",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var date = new Date();\r",
+									"date.setHours(date.getHours()+40)\r",
+									"pm.collectionVariables.set('expired_at', date.toISOString());\r",
+									"\r",
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token'))"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand created successfully\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('demand_id', jsonData.id)\r",
+									"\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set('demand_title', jsonData.title); \r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"{{$randomNoun}}\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"{{$randomNoun}}\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        }\r\n    ],\r\n    \"title\": \"{{$randomFullName}}\",\r\n    \"address\":\"{{$randomStreetAddress}}\",\r\n    \"expired_at\": \"{{expired_at}}\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send request with bad state flow",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Bad state flow\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_2'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":\"completed\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Accept with volunteer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand was accepter successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_2'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":\"accepted\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Accept  with client Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand can not be accepted by client\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_1'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":\"accepted\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete with client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand can be completed only by volunteer\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_1'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\": \"completed\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete with volunteer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand was completed successfully\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_2'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":\"completed\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve demand with volunteer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand can be approved only by client\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_2'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":\"approved\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Approve demand with client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Demand can be approved only by client\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set('token', pm.collectionVariables.get('token_1'));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"state\":\"accepted\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_address}}/demand/{{demand_id}}/",
+							"host": [
+								"{{base_address}}"
+							],
+							"path": [
+								"demand",
+								"{{demand_id}}",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "apikey",
+				"apikey": [
+					{
+						"key": "value",
+						"value": "Token {{token}}",
+						"type": "string"
+					},
+					{
+						"key": "key",
+						"value": "Authorization",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "username",
+			"value": "username"
+		},
+		{
+			"key": "password",
+			"value": "password"
+		},
+		{
+			"key": "token",
+			"value": "token"
+		},
+		{
+			"key": "token_1",
+			"value": ""
+		},
+		{
+			"key": "token_2",
+			"value": ""
+		},
+		{
+			"key": "demand_id",
+			"value": ""
+		},
+		{
+			"key": "demand_title",
+			"value": ""
+		},
+		{
+			"key": "demand_address",
+			"value": ""
+		},
+		{
+			"key": "expired_at",
+			"value": "2021-03-29T13:28:53.722Z"
+		},
+		{
+			"key": "user_address",
+			"value": ""
+		}
+	]
+}

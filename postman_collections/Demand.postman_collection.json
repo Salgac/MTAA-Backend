@@ -1,0 +1,369 @@
+{
+	"info": {
+		"_postman_id": "1f49fd2a-76c1-489b-b6c9-f767bced2789",
+		"name": "Demand",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create demand",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var expired_at = new Date()\r",
+							"pm.variables.set('expired_at', expired_at.toISOString());"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Demand created successfully\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.collectionVariables.set('demand_id', jsonData.id)\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Demand with given title already exists\", function () {\r",
+							"    pm.sendRequest(function (err, response) {\r",
+							"        pm.response.to.have.status(400);\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Token e89df8dd683fa25daff107282e63867ebb8bdf75"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"Banan\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"Mlieko\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        }\r\n    ],\r\n    \"title\": \"Test\",\r\n    \"address\": \"{{demand_address}}\",\r\n    \"expired_at\": \"2021-03-25T13:14:16.473000Z\"\r\n}"
+				},
+				"url": {
+					"raw": "{{base_address}}/demand/",
+					"host": [
+						"{{base_address}}"
+					],
+					"path": [
+						"demand",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Demand list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Created demand is listed\", function () {\r",
+							"    var res_text = pm.response.text();\r",
+							"    pm.expect(res_text).to.include(pm.variables.get('demad_title'));\r",
+							"    pm.expect(res_text).to.include(pm.variables.get('demand_address'));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_address}}/demand?user=volunteer",
+					"host": [
+						"{{base_address}}"
+					],
+					"path": [
+						"demand"
+					],
+					"query": [
+						{
+							"key": "user",
+							"value": "volunteer",
+							"description": "vrati poziadavky, v ktorych je prihlaseny pouzivatel ako volunteer"
+						},
+						{
+							"key": "user",
+							"value": "client",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change demand",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var expired_at = new Date()\r",
+							"expired_at.setHours(expired_at.getHours()+25)\r",
+							"pm.variables.set('expired_at', expired_at.toISOString());"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Demand successfully updated\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Token 69ac4b34fbe733bc62f88b1077eeae016dee1291"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"name\": \"Banan\",\r\n            \"quantity\": 1,\r\n            \"unit\": \"kg\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"Mlieko\",\r\n            \"quantity\": 2,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 1.2\r\n        },\r\n        {\r\n            \"name\": \"Novy item\",\r\n            \"quantity\": 25,\r\n            \"unit\": \"pcs\",\r\n            \"price\": 14.2\r\n        }\r\n    ],\r\n    \"title\": \"{{cahnged_demand_title}}\",\r\n    \"address\": \"{{changed_demand_address}}\",\r\n    \"expired_at\": \"{{expired_at}}\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/demand/{{demand_id}}/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"demand",
+						"{{demand_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Demand detail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Updated demand is listed\", function () {\r",
+							"    var res_text = pm.response.text();\r",
+							"    pm.expect(res_text).to.include(pm.variables.get('cahnged_demand_title'));\r",
+							"    pm.expect(res_text).to.include(pm.variables.get('changed_demand_address'));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_address}}/demand/{{demand_id}}",
+					"host": [
+						"{{base_address}}"
+					],
+					"path": [
+						"demand",
+						"{{demand_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Accept Demadn",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Demand state successfully updated\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"state\":\"approved\"\r\n}"
+				},
+				"url": {
+					"raw": "{{base_address}}/demand/{{demand_id}}/",
+					"host": [
+						"{{base_address}}"
+					],
+					"path": [
+						"demand",
+						"{{demand_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Demand",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Demand was successfully deleted\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_address}}/demand/{{demand_id}}/",
+					"host": [
+						"{{base_address}}"
+					],
+					"path": [
+						"demand",
+						"{{demand_id}}",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "Token {{token}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "volunteer"
+		},
+		{
+			"key": "token",
+			"value": "69ac4b34fbe733bc62f88b1077eeae016dee1291"
+		},
+		{
+			"key": "demand_id",
+			"value": 27
+		},
+		{
+			"key": "demad_title",
+			"value": "Moj nakupny zoznam"
+		},
+		{
+			"key": "demand_address",
+			"value": "Adresa"
+		},
+		{
+			"key": "cahnged_demand_title",
+			"value": "Zmenený názov"
+		},
+		{
+			"key": "changed_demand_address",
+			"value": "Zmenena adresa"
+		}
+	]
+}
