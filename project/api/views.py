@@ -4,12 +4,13 @@ from PIL import Image
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, Schema
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, generics, serializers
+from rest_framework import status, generics, serializers, views
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ParseError
 from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.http import FileResponse
 
 from .models import Demand, User
 from .serializers import (
@@ -82,7 +83,7 @@ class ImageView(generics.GenericAPIView):
     serializer_class = UserSerializer
     parser_classes = [FileUploadParser]
 
-    def put(self, request, filename):
+    def put(self, request):
         # validate request data in serializer
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -91,15 +92,13 @@ class ImageView(generics.GenericAPIView):
         if "file" not in request.data:
             raise ParseError("Empty content.")
 
-        # get file extension from url
-        filename, extension = os.path.splitext(filename)
-
         # get user
         user = self.request.user
-        path = "avatars/" + user.username + extension
+        path = "avatar/" + user.username + ".png"
 
-        # open and save image
+        # open, resize and save image
         img = Image.open(request.data["file"])
+        img = img.resize((100, 100), Image.ANTIALIAS)
         img.save(path)
 
         user.avatar = path
@@ -107,9 +106,24 @@ class ImageView(generics.GenericAPIView):
 
         # render response
         return Response(
-            {"user": user.username, "file_path": user.avatar.url},
+            {"file_path": user.avatar.url},
             status=status.HTTP_200_OK,
         )
+
+
+class AvatarView(views.APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, filename):
+        # validate name
+        try:
+            img = open("avatar/" + filename, "rb")
+        except FileNotFoundError:
+            img = open("avatar/default.png", "rb")
+
+        # return
+        response = FileResponse(img)
+        return response
 
 
 class DemandListAPIView(generics.ListCreateAPIView):
@@ -160,7 +174,7 @@ class DemandDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        state = request.data['state']
+        state = request.data["state"]
         if state == Demand.State.ACCEPTED:
             serializer.save(volunteer=request.user)
         serializer.save(state=state)

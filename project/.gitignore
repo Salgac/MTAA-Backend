@@ -116,4 +116,5 @@ GitHub.sublime-settings
 .history
 
 #avatar images in directory
-avatars/*
+avatar/*
+!avatar/default.png
