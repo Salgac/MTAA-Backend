@@ -10,7 +10,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["username", "address", "password"]
+        fields = ["username", "address", "password", "avatar"]
+        read_only_fields = ["avatar"]
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -92,18 +93,18 @@ class DemandSerializer(serializers.ModelSerializer):
             if instance.state == Demand.State.EXPIRED:
                 serializers.ValidationError("Demand has already expired")
             if (
-                (
-                    instance.state == Demand.State.CREATED
-                    and not state == Demand.State.ACCEPTED
-                )
-                or (
+                    (
+                            instance.state == Demand.State.CREATED
+                            and not state == Demand.State.ACCEPTED
+                    )
+                    or (
                     instance.state == Demand.State.ACCEPTED
                     and not state == Demand.State.COMPLETED
-                )
-                or (
+            )
+                    or (
                     instance.state == Demand.State.COMPLETED
                     and not state == Demand.State.APPROVED
-                )
+            )
             ):
                 raise serializers.ValidationError(
                     "Demand state cannot be changed from "
@@ -113,7 +114,7 @@ class DemandSerializer(serializers.ModelSerializer):
                 )
 
             if (
-                state == Demand.State.ACCEPTED or state == Demand.State.COMPLETED
+                    state == Demand.State.ACCEPTED or state == Demand.State.COMPLETED
             ) and user == instance.client:
                 raise serializers.ValidationError(
                     "Demand state cannot be changed to " + str(state) + " by client"
