@@ -1,6 +1,5 @@
-import os
-
 from PIL import Image
+from django.http import FileResponse
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, Schema
 from drf_yasg.utils import swagger_auto_schema
@@ -10,7 +9,6 @@ from rest_framework.exceptions import ParseError
 from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.http import FileResponse
 
 from .models import Demand, User
 from .serializers import (
@@ -114,6 +112,12 @@ class ImageView(generics.GenericAPIView):
 class AvatarView(views.APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Get avatar by username",
+        responses={
+            200: Schema(type=openapi.TYPE_FILE),
+        }
+    )
     def get(self, request, filename):
         # validate name
         try:
@@ -144,7 +148,7 @@ class DemandListAPIView(generics.ListCreateAPIView):
                 enum=["client", "volunteer"],
             ),
             Parameter(name="address", in_=openapi.IN_QUERY, type=openapi.TYPE_STRING),
-        ]
+        ],
     )
     def get(self, request):
         demands = Demand.objects.all()
