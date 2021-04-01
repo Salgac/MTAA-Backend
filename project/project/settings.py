@@ -24,7 +24,7 @@ SECRET_KEY = "9@5%n3_k_93b%rb03e#tud%z%)teksfei!4#hu$7ey+-466yp0"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["139.162.130.177", "localhost", "127.0.0.1"]
 
 AUTH_USER_MODEL = "api.User"
 

@@ -1,5 +1,7 @@
 # Projekt na predmet mobilné technológie a aplikácie
 
+App deployed on: http://139.162.130.177:8000/
+
 ## Link na dokumentáciu
 
 - https://docs.google.com/document/d/1XpzISc90pOp5DxOYALgtJmV85c8TKntzHyB-K1jk4uw/edit?usp=sharing
