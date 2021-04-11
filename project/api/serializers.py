@@ -152,10 +152,10 @@ class DemandListSerializer(DemandSerializer):
     items = ItemSerializer(many=True, write_only=True)
 
     def create(self, validated_data):
+        user = self.context["request"].user
+        if not validated_data.__contains__("address"):
+            validated_data["address"] = user.address
         items_data = check_demand_duplicates(validated_data)
         demand = Demand.objects.create(**validated_data)
         create_items_for_demand(items_data, demand)
-        user = self.context["request"].user
-        if not demand.address:
-            demand.address = user.address
         return demand
