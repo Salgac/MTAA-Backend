@@ -87,11 +87,11 @@ class DemandSerializer(serializers.ModelSerializer):
         """
         request = self.context["request"]
         user = request.user
+        if instance.state == Demand.State.EXPIRED:
+            serializers.ValidationError("Demand has already expired")
         # PATCH request for state update
         if self.partial:
             state = request.data["state"]
-            if instance.state == Demand.State.EXPIRED:
-                serializers.ValidationError("Demand has already expired")
             if (
                     (
                             instance.state == Demand.State.CREATED

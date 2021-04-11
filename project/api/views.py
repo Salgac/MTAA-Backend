@@ -1,4 +1,5 @@
 from PIL import Image
+from django.db.models import Q
 from django.http import FileResponse
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, Schema
@@ -151,13 +152,15 @@ class DemandListAPIView(generics.ListCreateAPIView):
         ],
     )
     def get(self, request):
-        demands = Demand.objects.all()
+        demands = Demand.objects.all().filter().order_by("expired_at")
         user_query = request.query_params.get("user")
         user = self.request.user
         if user_query == "client":
             demands = demands.filter(client=user)
         elif user_query == "volunteer":
             demands = demands.filter(volunteer=user)
+        else:
+            demands = demands.filter(~Q(client=user), ~Q(volunteer=user))
 
         address_query = request.query_params.get("address")
         if address_query is not None:
@@ -180,8 +183,9 @@ class DemandDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
         state = request.data["state"]
         if state == Demand.State.ACCEPTED:
-            serializer.save(volunteer=request.user)
-        serializer.save(state=state)
+            serializer.save(volunteer=request.user, state=state)
+        else:
+            serializer.save(state=state)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def perform_destroy(self, instance):
