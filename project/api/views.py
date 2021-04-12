@@ -146,7 +146,13 @@ class DemandListAPIView(generics.ListCreateAPIView):
                 name="user",
                 in_=openapi.IN_QUERY,
                 type="enum",
-                enum=["client", "volunteer"],
+                enum=["client", "volunteer", "none"],
+            ),
+            Parameter(
+                name="state",
+                in_=openapi.IN_QUERY,
+                type="enum",
+                enum=["created", "accepted", "completed", "approved", "expired"],
             ),
             Parameter(name="address", in_=openapi.IN_QUERY, type=openapi.TYPE_STRING),
         ],
@@ -159,8 +165,12 @@ class DemandListAPIView(generics.ListCreateAPIView):
             demands = demands.filter(client=user)
         elif user_query == "volunteer":
             demands = demands.filter(volunteer=user)
-        else:
+        elif user_query == "none":
             demands = demands.filter(~Q(client=user), ~Q(volunteer=user))
+
+        state_query = request.query_params.get("state")
+        if state_query is not None:
+            demands = demands.filter(state=state_query)
 
         address_query = request.query_params.get("address")
         if address_query is not None:
