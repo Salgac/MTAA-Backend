@@ -42,7 +42,7 @@ class User(AbstractBaseUser):
 class DemandManager(models.Manager):
     def get_queryset(self):
         queryset = super(DemandManager, self).get_queryset()
-        queryset.filter(expired_at__lt=timezone.now()).update(
+        queryset.filter(state=Demand.State.CREATED).filter(expired_at__lt=timezone.now()).update(
             state=Demand.State.EXPIRED
         )
         return queryset
@@ -78,12 +78,12 @@ class Demand(models.Model):
         str(self.title)
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+            self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         # if demand can be changed, verify expired_at time
         if (
-            self.state == Demand.State.CREATED
-            and self.expired_at < timezone.now() + datetime.timedelta(days=1)
+                self.state == Demand.State.CREATED
+                and self.expired_at < timezone.now() + datetime.timedelta(days=1)
         ):
             raise serializers.ValidationError(
                 "Expiration time must be in more than 24 hours from now"
