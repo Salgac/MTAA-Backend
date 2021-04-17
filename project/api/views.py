@@ -7,7 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, generics, serializers, views
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ParseError
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -80,24 +80,21 @@ class Login(generics.GenericAPIView):
 class ImageView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
-    parser_classes = [FileUploadParser]
+    parser_classes = [MultiPartParser]
 
     def put(self, request):
         # validate request data in serializer
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # test for file in data
-        if "file" not in request.data:
-            raise ParseError("Empty content.")
-
         # get user
         user = self.request.user
         path = "avatar/" + user.username + ".png"
 
         # open, resize and save image
-        img = Image.open(request.data["file"])
-        img = img.resize((100, 100), Image.ANTIALIAS)
+        imageFile = request._request.FILES.get("file")
+        img = Image.open(imageFile)
+        img = img.resize((300, 300), Image.ANTIALIAS)
         img.save(path)
 
         user.avatar = path
@@ -117,7 +114,7 @@ class AvatarView(views.APIView):
         operation_description="Get avatar by username",
         responses={
             200: Schema(type=openapi.TYPE_FILE),
-        }
+        },
     )
     def get(self, request, filename):
         # validate name
